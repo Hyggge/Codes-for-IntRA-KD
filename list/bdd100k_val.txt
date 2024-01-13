@@ -1,0 +1,4 @@
+/irip/chenzhenghao_shixi/Codes-for-IntRA-KD/data/sample/00a9cd6b-b39be004.jpg /irip/chenzhenghao_shixi/Codes-for-IntRA-KD/data/masks/00a9cd6b-b39be004.png
+/irip/chenzhenghao_shixi/Codes-for-IntRA-KD/data/sample/01ce9ed7-51ffbb0e.jpg /irip/chenzhenghao_shixi/Codes-for-IntRA-KD/data/masks/01ce9ed7-51ffbb0e.png
+/irip/chenzhenghao_shixi/Codes-for-IntRA-KD/data/sample/0a3bb2d8-c195d91e.jpg /irip/chenzhenghao_shixi/Codes-for-IntRA-KD/data/masks/0a3bb2d8-c195d91e.png
+/irip/chenzhenghao_shixi/Codes-for-IntRA-KD/data/sample/1e1cf714-a3301d1e.jpg /irip/chenzhenghao_shixi/Codes-for-IntRA-KD/data/masks/1e1cf714-a3301d1e.png

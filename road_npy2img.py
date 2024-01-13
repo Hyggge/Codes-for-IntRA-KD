@@ -12,16 +12,16 @@ def func(image_name):
     origin_npy = np.load('road05_tmp/' + image_name)
     # print(origin_npy.shape)
     tmp_npy = np.zeros(origin_npy.shape, dtype='uint8')
-    final_npy = np.zeros((2710, 3384), dtype='uint8')
+    # final_npy = np.zeros((2710, 3384), dtype='uint8')
     for cnt in range(len(new_list)):
         tmp_npy = tmp_npy + (origin_npy == (cnt + 1)) * new_list[cnt]
     # tmp_npy = tmp_npy + (origin_npy == 1) * 0 # 255
     origin_npy = tmp_npy
-    origin_npy = cv2.resize(origin_npy, (3384, 1010), interpolation=cv2.INTER_NEAREST).astype('uint8')
+    origin_npy = cv2.resize(origin_npy, (1280, 720), interpolation=cv2.INTER_NEAREST).astype('uint8')
     # print(origin_npy.shape)
-    final_npy[1700:, :] = origin_npy
-    origin_npy = final_npy
-    assert(origin_npy.shape == (2710, 3384))
+    # final_npy[1700:, :] = origin_npy
+    # origin_npy = final_npy
+    # assert(origin_npy.shape == (2710, 3384))
     cv2.imwrite('road05/' + image_name.replace('.npy', '.png'), origin_npy) # .astype('uint8'))
 
 home_directory = 'road05_tmp'

@@ -14,6 +14,7 @@ from models import sync_bn
 import dataset as ds
 from options.options import parser
 import numpy as np
+import collections
 
 best_mIoU = 0
 
@@ -22,11 +23,7 @@ def main():
     global args, best_mIoU
     args = parser.parse_args()
 
-    os.environ["CUDA_VISIBLE_DEVICES"] = ','.join(str(gpu) for gpu in args.gpus)
-    args.gpus = len(args.gpus)
-
-    if args.no_partialbn:
-        sync_bn.Synchronize.init(args.gpus)
+    os.environ["CUDA_VISIBLE_DEVICES"] = ' '
 
     if args.dataset == 'VOCAug' or args.dataset == 'VOC2012' or args.dataset == 'COCO':
         num_class = 21
@@ -46,15 +43,17 @@ def main():
     input_mean = model.input_mean
     input_std = model.input_std
     policies = model.get_optim_policies()
-    model = torch.nn.DataParallel(model, device_ids=range(args.gpus)).cuda()
 
     if args.resume:
         if os.path.isfile(args.resume):
             print(("=> loading checkpoint '{}'".format(args.resume)))
-            checkpoint = torch.load(args.resume)
+            checkpoint = torch.load(args.resume, map_location='cpu')
+            state_dict_cpu = collections.OrderedDict()
+            for k, v in checkpoint["state_dict"].items():
+                state_dict_cpu[k[7:]] = v
             args.start_epoch = checkpoint['epoch']
             best_mIoU = checkpoint['best_mIoU']
-            torch.nn.Module.load_state_dict(model, checkpoint['state_dict'])
+            torch.nn.Module.load_state_dict(model, state_dict_cpu)
             print(("=> loaded checkpoint '{}' (epoch {})".format(args.evaluate, checkpoint['epoch'])))
         else:
             print(("=> no checkpoint found at '{}'".format(args.resume)))
@@ -79,14 +78,14 @@ def main():
             torchvision.transforms.Compose([
             tf.GroupRandomScaleRatio(size=(2030, 2030, 606, 606), interpolation=(cv2.INTER_LINEAR, cv2.INTER_NEAREST)),
             tf.GroupNormalize(mean=(input_mean, (0, )), std=(input_std, (1, ))),])
-            ]), batch_size=args.batch_size, shuffle=False, num_workers=args.workers, pin_memory=False)
+            ]), batch_size=args.batch_size, shuffle=False, num_workers=0, pin_memory=False)
 
     # define loss function (criterion) optimizer and evaluator
     weights = [1.0 for _ in range(37)]
     weights[0] = 0.05
     weights[36] = 0.05
-    class_weights = torch.FloatTensor(weights).cuda()
-    criterion = torch.nn.NLLLoss(ignore_index=ignore_label, weight=class_weights).cuda()
+    class_weights = torch.FloatTensor(weights)
+    criterion = torch.nn.NLLLoss(ignore_index=ignore_label, weight=class_weights)
     for group in policies:
         print(('group: {} has {} params, lr_mult: {}, decay_mult: {}'.format(group['name'], len(group['params']), group['lr_mult'], group['decay_mult'])))
     optimizer = torch.optim.SGD(policies, args.lr, momentum=args.momentum, weight_decay=args.weight_decay)
@@ -185,7 +184,7 @@ def validate(val_loader, model, criterion, iter, evaluator, logger=None):
         pred = np.argmax(pred, axis=3).astype(np.uint8)
         pred = pred + 1
         for cnt in range(len(img_name)):
-            np.save('road05_tmp/' + img_name[cnt].split('/')[5].replace('jpg', 'npy'), pred[cnt]) #split('/')[5]
+            np.save('road05_tmp/' + img_name[cnt].split('/')[6].replace('jpg', 'npy'), pred[cnt]) #split('/')[5]
 
         # measure elapsed time
         batch_time.update(time.time() - end)

@@ -1,4 +1,4 @@
-python3 -u test_erfnet_multi_scale.py ApolloScape ERFNet train bdd100k_val \
+python3 -u test_erfnet_single_scale.py ApolloScape ERFNet train bdd100k_val \
                           --lr 0.01 \
                           --npb \
                           --resume trained_model/erfnet_trained.pth.tar \

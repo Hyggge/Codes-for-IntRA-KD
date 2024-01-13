@@ -5,7 +5,7 @@ import torch
 from torch.utils.data import Dataset
 
 
-class VOCAugDataSet(Dataset):
+class VOCSingleDataSet(Dataset):
     def __init__(self, dataset_path='/irip/chenzhenghao_shixi/Codes-for-IntRA-KD/list', data_list='bdd100k_val', transform=None):
 
         with open(os.path.join(dataset_path, data_list + '.txt')) as f:
@@ -17,10 +17,7 @@ class VOCAugDataSet(Dataset):
 
         self.img_path = dataset_path
         self.gt_path = dataset_path
-        self.transform_0 = transform[0]
-        self.transform_1 = transform[1]
-        self.transform_2 = transform[2]
-        self.transform_3 = transform[3]
+        self.transform = transform[0]
         #self.transform_4 = transform[4]
         self.is_testing = data_list == 'bdd100k_val' # 'val'
 
@@ -34,29 +31,12 @@ class VOCAugDataSet(Dataset):
         # image = image[1700:, :, :]
         # label = label[1700:, :, :]
         label = label.squeeze()
-        image_copy, label_copy = image, label
-        if self.transform_0:
-            image, label = self.transform_0((image, label))
+        if self.transform:
+            image, label = self.transform((image, label))
             image = torch.from_numpy(image).permute(2, 0, 1).contiguous().float()
             label = torch.from_numpy(label).contiguous().long()
 
-            image_1, label_1 = self.transform_1((image_copy, label_copy))
-            image_1 = torch.from_numpy(image_1).permute(2, 0, 1).contiguous().float()
-            label_1 = torch.from_numpy(label_1).contiguous().long()
-
-            image_2, label_2 = self.transform_2((image_copy, label_copy))
-            image_2 = torch.from_numpy(image_2).permute(2, 0, 1).contiguous().float()
-            label_2 = torch.from_numpy(label_2).contiguous().long()
-
-            image_3, label_3 = self.transform_3((image_copy, label_copy))
-            image_3 = torch.from_numpy(image_3).permute(2, 0, 1).contiguous().float()
-            label_3 = torch.from_numpy(label_3).contiguous().long()
-
-            '''image_4, label_4 = self.transform_4((image_copy, label_copy))
-            image_4 = torch.from_numpy(image_4).permute(2, 0, 1).contiguous().float()
-            label_4 = torch.from_numpy(label_4).contiguous().long()'''
-
         if self.is_testing:
-            return image, image_1, image_2, image_3, self.img_list[idx] #, image_4
+            return image, self.img_list[idx] #, image_4
         else:
             return image, label

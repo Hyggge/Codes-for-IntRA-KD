@@ -1,2 +1,3 @@
 from .voc_aug_test import VOCAugDataSet
-from .voc_aug_train import VOCAugDataset_train
+from .voc_single_test import VOCSingleDataSet
+from .voc_aug_train import VOCAugDataSet_train

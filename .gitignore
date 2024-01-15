@@ -2,3 +2,4 @@ trained_model
 *.whl
 road05/
 road05_tmp/
+__pycache__

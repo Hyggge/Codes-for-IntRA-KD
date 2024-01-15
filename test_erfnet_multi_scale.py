@@ -79,7 +79,7 @@ def main():
             torchvision.transforms.Compose([
             tf.GroupRandomScaleRatio(size=(2030, 2030, 606, 606), interpolation=(cv2.INTER_LINEAR, cv2.INTER_NEAREST)),
             tf.GroupNormalize(mean=(input_mean, (0, )), std=(input_std, (1, ))),])
-            ]), batch_size=args.batch_size, shuffle=False, num_workers=args.workers, pin_memory=False)
+            ]), batch_size=args.batch_size, shuffle=False, num_workers=0, pin_memory=False)
 
     # define loss function (criterion) optimizer and evaluator
     weights = [1.0 for _ in range(37)]
@@ -185,7 +185,7 @@ def validate(val_loader, model, criterion, iter, evaluator, logger=None):
         pred = np.argmax(pred, axis=3).astype(np.uint8)
         pred = pred + 1
         for cnt in range(len(img_name)):
-            np.save('road05_tmp/' + img_name[cnt].split('/')[5].replace('jpg', 'npy'), pred[cnt]) #split('/')[5]
+            np.save('road05_tmp/' + img_name[cnt].split('/')[6].replace('jpg', 'npy'), pred[cnt]) #split('/')[5]
 
         # measure elapsed time
         batch_time.update(time.time() - end)

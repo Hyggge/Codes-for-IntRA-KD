@@ -79,7 +79,7 @@ def main():
             torchvision.transforms.Compose([
             tf.GroupRandomScaleRatio(size=(2030, 2030, 606, 606), interpolation=(cv2.INTER_LINEAR, cv2.INTER_NEAREST)),
             tf.GroupNormalize(mean=(input_mean, (0, )), std=(input_std, (1, ))),])
-            ]), batch_size=args.batch_size, shuffle=False, num_workers=args.workers, pin_memory=False)
+            ]), batch_size=args.batch_size, shuffle=False, num_workers=0, pin_memory=False)
 
     # define loss function (criterion) optimizer and evaluator
     weights = [1.0 for _ in range(37)]
@@ -99,7 +99,6 @@ def main():
 def cal_model_output(model, img_scale_dict, cnt, img_h_list, img_w_list):
 
     input_img = img_scale_dict[str(cnt)]
-    # with torch.no_grad():
     input_var = torch.autograd.Variable(input_img, volatile=True)        
     input_var_1 = input_var[:, :, :int(args.test_size / 3), :args.test_size]
     input_var_2 = input_var[:, :, :int(args.test_size / 3), (img_w_list[cnt] - args.test_size):]
@@ -137,10 +136,6 @@ def validate(val_loader, model, criterion, iter, evaluator, logger=None):
     val_img_list = []
     img_w_list = [1692, 1861, 1624, 2030] #[1692, 1861, 1624, 1590, 2030]
     img_h_list = [505, 556, 485, 606] #[505, 556, 485, 475, 606]
-    #with open('/home/houyuenan/remote/ApolloScapes/list/test_img.txt', 'r') as f:
-    #    for line in f.readlines():
-    #        val_img_list.append(line.strip().split(' ')[0])
-    # switch to evaluate mode
     model.eval()
     end = time.time()
     
@@ -172,11 +167,6 @@ def validate(val_loader, model, criterion, iter, evaluator, logger=None):
             freq_mat_3[(img_h_list[3] - int(args.test_size / 3)):, :args.test_size] += np.ones((int(args.test_size / 3), args.test_size))
             freq_mat_3[(img_h_list[3] - int(args.test_size / 3)):, (img_w_list[3] - args.test_size):] += np.ones((int(args.test_size / 3), args.test_size))
 
-            '''freq_mat_4 = np.zeros((img_h_list[4], img_w_list[4]))
-            freq_mat_4[:int(args.test_size / 3), :args.test_size] += np.ones((int(args.test_size / 3), args.test_size))
-            freq_mat_4[:int(args.test_size / 3), (img_w_list[4] - args.test_size):] += np.ones((int(args.test_size / 3), args.test_size))
-            freq_mat_4[(img_h_list[4] - int(args.test_size / 3)):, :args.test_size] += np.ones((int(args.test_size / 3), args.test_size))
-            freq_mat_4[(img_h_list[4] - int(args.test_size / 3)):, (img_w_list[4] - args.test_size):] += np.ones((int(args.test_size / 3), args.test_size))'''
         freq_scale_dict = {'0':freq_mat, '1':freq_mat_1, '2':freq_mat_2, '3':freq_mat_3} #, '4':freq_mat_4}
         pred_final = np.zeros((args.batch_size, 37, img_h_list[0], img_w_list[0]))
         for cnt in range(4):#5
@@ -195,7 +185,7 @@ def validate(val_loader, model, criterion, iter, evaluator, logger=None):
         pred = np.argmax(pred, axis=3).astype(np.uint8)
         pred = pred + 1
         for cnt in range(len(img_name)):
-            np.save('road05_tmp/' + img_name[cnt].split('/')[5].replace('jpg', 'npy'), pred[cnt]) #split('/')[5]
+            np.save('road05_tmp/' + img_name[cnt].split('/')[6].replace('jpg', 'npy'), pred[cnt]) #split('/')[5]
 
         # measure elapsed time
         batch_time.update(time.time() - end)
